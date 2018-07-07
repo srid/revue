@@ -10,8 +10,11 @@ library
                , reflex-dom
                , static
                , text
+               , string-conv
+               , clay
   exposed-modules:
     Frontend
+    Frontend.Css
   ghc-options: -Wall
 
 executable frontend
@@ -23,6 +26,8 @@ executable frontend
                , static
                , text
                , frontend
+               , string-conv
+               , clay
   --TODO: Make these ghc-options optional
   ghc-options: -threaded
   if os(darwin)
