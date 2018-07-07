@@ -11,6 +11,7 @@ library
                , static
                , text
                , string-conv
+               , obelisk-route
                , clay
   exposed-modules:
     Frontend
@@ -27,6 +28,7 @@ executable frontend
                , text
                , frontend
                , string-conv
+               , obelisk-route
                , clay
   --TODO: Make these ghc-options optional
   ghc-options: -threaded
