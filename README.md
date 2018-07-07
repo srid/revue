@@ -1,6 +1,6 @@
 # revue
 
-revue ([\ʁə.vy\](https://en.wiktionary.org/wiki/revue#French)) is a Reflex based static website geared towards managing personal websites.
+revue ([\ʁə.vy\\](https://en.wiktionary.org/wiki/revue#French)) is a Reflex based static website geared towards managing personal websites.
 
 ## Development
 

@@ -22,10 +22,12 @@ import Frontend.Css (appCssStr)
 -- TODO: As soon as obelisk backend routing is ready, move content as markdown
 -- to the backend (or have backend fetch it from elsewhere).
 
+title :: Text
+title = "Sridhar Ratnakumar"
+
 frontend :: (StaticWidget x (), Widget x ())
 frontend = (head', body)
   where
-    title = "Revue"
     head' = do
       elAttr "meta" ("name" =: "viewport" <> "content" =: "width=device-width, initial-scale=1") blank
       el "title" $ text title
@@ -38,21 +40,27 @@ frontend = (head', body)
 
 pageTemplate :: (DomBuilder t m, EventWriter t (Endo (R Route)) m) => m a -> m a
 pageTemplate page = divClass "ui container" $ do
-  divClass "ui top attached inverted header" $ el "h1" $ text "Revue"
+  divClass "ui top attached inverted header" $ el "h1" $ text title
   divClass "ui attached segment" $
     elAttr "div" ("id" =: "content") $ page
 
 landingPage :: (DomBuilder t m, EventWriter t (Endo (R Route)) m) => m ()
 landingPage = pageTemplate $ do
   el "h2" $ text "Welcome!"
+  -- el "p" $ do
+  --   l <- aLink $ text "About"
+  --   tellEvent $ Endo (const $ Route_About :/ ()) <$ l
   el "p" $ do
-    l <- aLink $ text "About"
-    tellEvent $ Endo (const $ Route_About :/ ()) <$ l
-  el "p" $ text loremIpsum
+    text "This website is work in progress. Meanwhile you may "
+    elAttr "a" ("href" =: "https://stackoverflow.com/story/sridca") $ text "look at my resume"
+    text " or "
+    elAttr "a" ("href" =: "https://github.com/srid/revue") $ text "look at the source code"
+    text "."
 
+-- TODO: remove
 aboutPage :: (DomBuilder t m, EventWriter t (Endo (R Route)) m) => m ()
 aboutPage = pageTemplate $ do
-  el "h2" $ text "About"
+  el "h2" $ text "About - Unused"
   el "p" $ do
     l <- aLink $ text "Home"
     tellEvent $ Endo (const $ Route_Landing :/ ()) <$ l
@@ -67,6 +75,3 @@ click'
   => m (target, a)
   -> m (Event t (DomEventType target 'ClickTag))
 click' = fmap (domEvent Click . fst)
-
-loremIpsum :: Text
-loremIpsum = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
