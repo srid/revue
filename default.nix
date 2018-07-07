@@ -3,8 +3,8 @@
 }:
 with import ./.obelisk/impl { inherit system iosSdkVersion; };
 project ./. ({ ... }: {
-  android.applicationId = "systems.obsidian.obelisk.examples.minimal";
-  android.displayName = "Obelisk Minimal Example";
-  ios.bundleIdentifier = "systems.obsidian.obelisk.examples.minimal";
-  ios.bundleName = "Obelisk Minimal Example";
+  android.applicationId = "ca.srid.revue.dev";
+  android.displayName = "Revue (srid)";
+  ios.bundleIdentifier = "ca.srid.revue.dev";
+  ios.bundleName = "Revue (srid";
 })

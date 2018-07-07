@@ -5,7 +5,18 @@ build-type: Simple
 
 library
   hs-source-dirs: src
-  build-depends: base
+  build-depends: aeson
+               , base
+               , dependent-sum
+               , dependent-sum-template
+               , obelisk-route
+               , mtl
+               , text
+               , these
+               , universe
+               , reflex
 
   exposed-modules:
     Common.Api
+    Common.Route
+  ghc-options: -Wall
