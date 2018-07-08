@@ -8,6 +8,7 @@ library
   build-depends: base
                , common
                , reflex-dom
+               , foldl
                , static
                , text
                , string-conv
@@ -26,6 +27,7 @@ executable frontend
                , common
                , reflex-dom
                , static
+               , foldl
                , text
                , frontend
                , string-conv
