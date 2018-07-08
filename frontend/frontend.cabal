@@ -13,6 +13,7 @@ library
                , string-conv
                , obelisk-route
                , clay
+               , mmark
   exposed-modules:
     Frontend
     Frontend.Css
@@ -30,6 +31,7 @@ executable frontend
                , string-conv
                , obelisk-route
                , clay
+               , mmark
   --TODO: Make these ghc-options optional
   ghc-options: -threaded
   if os(darwin)
