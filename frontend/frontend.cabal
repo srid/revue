@@ -18,6 +18,7 @@ library
   exposed-modules:
     Frontend
     Frontend.Css
+    Frontend.Markdown
   ghc-options: -Wall
 
 executable frontend

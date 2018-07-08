@@ -1,3 +1,4 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Frontend.Css (appCssStr) where
@@ -15,8 +16,8 @@ appCssStr = toS $ render appCss
 themeColor :: Color
 themeColor = lightgreen
 
-themeLighterColor :: Color
-themeLighterColor = "#e9fce9"
+-- themeLighterColor :: Color
+-- themeLighterColor = "#e9fce9"
 
 mainFont :: (Text, Text)
 mainFont = ("Comfortaa:700", "Comfortaa")
@@ -35,7 +36,11 @@ appCss = do
   "h1, h2, h3, h4, h5, h6" ? do
     important $ fontFamily [snd headerFont] [cursive]
 
-  h1 ? do
+  ".header h1" ? do
     textAlign center
     important $ color themeColor
 
+  -- ".markdown" ? do
+  --   border solid (px 1) black
+  --   sym padding $ em 1
+  --   backgroundColor "#eee"
