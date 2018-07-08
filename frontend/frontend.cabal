@@ -15,6 +15,7 @@ library
                , obelisk-route
                , clay
                , mmark
+               , modern-uri
   exposed-modules:
     Frontend
     Frontend.Css
@@ -35,6 +36,7 @@ executable frontend
                , obelisk-route
                , clay
                , mmark
+               , modern-uri
   --TODO: Make these ghc-options optional
   ghc-options: -threaded
   if os(darwin)
