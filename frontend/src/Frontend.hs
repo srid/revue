@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -7,13 +8,19 @@
 module Frontend where
 
 import Data.Semigroup ((<>))
+import Control.Monad (forM_)
 import Data.Monoid hiding ((<>))
 import Data.Text (Text)
 import qualified Data.Text as T
 import Reflex.Dom.Core
+import Control.Foldl
+import qualified Data.List.NonEmpty as NE
 
 import Obelisk.Route.Frontend
 import Static
+
+import qualified Text.MMark as MMark
+import Text.MMark.Extension (Bni, Block (..), Inline (..))
 
 import Common.Route
 
@@ -38,6 +45,21 @@ frontend = (head', body)
         Route_Landing -> landingPage
         Route_About -> aboutPage
 
+markdownView :: (DomBuilder t m, EventWriter t (Endo (R Route)) m) => Text -> m ()
+markdownView source = case MMark.parse "unnamed.md" source of
+  Left errs -> el "tt" $ text $ T.pack (MMark.parseErrorsPretty source errs)
+  Right r -> MMark.runScannerM r build
+  where
+    build = FoldM (\x a -> mmarkToReflex a) blank pure
+    mmarkToReflex = \case
+      Paragraph s -> el "p" $ flip forM_ renderInline $ NE.toList s
+      x -> el "li" $ text $ T.pack $ show x
+    renderInline = \case
+      Plain s -> text s
+      Emphasis s -> el "em" $ flip forM_ renderInline $ NE.toList s
+      x -> el "tt" $ text $ T.pack $ show x
+
+
 pageTemplate :: (DomBuilder t m, EventWriter t (Endo (R Route)) m) => m a -> m a
 pageTemplate page = divClass "ui container" $ do
   divClass "ui top attached inverted header" $ el "h1" $ text title
@@ -56,6 +78,7 @@ landingPage = pageTemplate $ do
     text " or "
     elAttr "a" ("href" =: "https://github.com/srid/revue") $ text "look at the source code"
     text "."
+  divClass "md" $ markdownView "Hello *world*!\n\nHow are you doing?\n\n# New heading\n\nContent."
 
 -- TODO: remove
 aboutPage :: (DomBuilder t m, EventWriter t (Endo (R Route)) m) => m ()
