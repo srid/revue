@@ -9,6 +9,9 @@
 {-# LANGUAGE TypeApplications #-}
 module Frontend where
 
+import Prelude hiding (id, (.))
+
+import Control.Category
 import Data.ByteString (ByteString)
 import Data.FileEmbed
 import Data.Monoid hiding ((<>))
@@ -17,8 +20,10 @@ import Data.Text (Text)
 import qualified Data.Text.Encoding as T
 
 -- import Language.Javascript.JSaddle
+import Obelisk.Frontend
 import Obelisk.Route.Frontend
 import Reflex.Dom.Core
+
 import Static
 
 import Common.Route
@@ -32,19 +37,19 @@ import Frontend.Markdown
 title :: Text
 title = "Sridhar Ratnakumar"
 
-frontend :: (StaticWidget x (), Widget x ())
-frontend = (head', body)
-  where
-    head' = do
+frontend :: Frontend (R Route)
+frontend = Frontend
+  { _frontend_head = do
       elAttr "meta" ("name" =: "viewport" <> "content" =: "width=device-width, initial-scale=1") blank
       el "title" $ text title
       elAttr "link" ("rel" =: "stylesheet" <> "type" =: "text/css" <> "href" =: static @"semantic.min.css") blank
       el "style" $ text appCssStr
-    body = runRouteViewT routeComponentEncoder routeRestEncoder
-      (\_ -> title) (\_ -> Route_Landing :/ ()) $ subRoute_ $ \r ->
-      pageTemplate $ do
-        _ <- fetchMarkdown "foo"
-        divClass "markdown" $ markdownView $ getRouteMarkdown r
+  , _frontend_body = pageTemplate $ subRoute_ $
+        divClass "markdown" . markdownView . getRouteMarkdown
+  , _frontend_title = \_ -> title
+  , _frontend_notFoundRoute = \_ -> Route_Landing :/ ()
+  , _frontend_routeEncoder = obeliskRouteEncoder routeComponentEncoder routeRestEncoder . Encoder (pure $ prismValidEncoder $ rPrism _ObeliskRoute_App) --TODO: Deal with failure
+  }
 
 pageTemplate :: (DomBuilder t m, EventWriter t (Endo (R Route)) m) => m a -> m a
 pageTemplate page = divClass "ui container" $ do
@@ -55,7 +60,6 @@ pageTemplate page = divClass "ui container" $ do
 getRouteMarkdown :: Route a -> Text
 getRouteMarkdown = \case
   Route_Landing -> T.decodeUtf8 landingMd
-  Route_About -> "TODO"
 
 landingMd :: ByteString
 landingMd = $(embedFile "static/markdown/landing.md")

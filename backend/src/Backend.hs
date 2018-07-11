@@ -1,9 +1,17 @@
 module Backend where
 
-import Frontend
-import qualified Obelisk.Backend as Ob
+import Data.Text (Text)
 
-backend :: IO ()
-backend = Ob.backend Ob.def
-  { Ob._backendConfig_head = fst frontend
-  }
+import Obelisk.Backend as Ob
+import Obelisk.Route
+
+import Common.Route
+import Frontend
+
+backend :: Either Text (IO ())
+backend = do
+  let backendConfig = BackendConfig
+        { _backendConfig_frontend = frontend
+        , _backendConfig_routeEncoder = obeliskRouteEncoder routeComponentEncoder routeRestEncoder --TODO: Factor this out so that it isn't partially redundant with _frontend_routeEncoder
+        }
+  Ob.backend backendConfig

@@ -15,7 +15,6 @@ project ./. ({ pkgs, ... }: {
       rev = "54dc9eaf0abd180ef9e35d97313062d99a02ee75";
       sha256 = "0y38hyd2gvr7lrbxkrjwg4h0077a54m7gxlvm9s4kk0995z1ncax";
     };
-
     # mmark packages
     mmark = pkgs.fetchFromGitHub {
       owner = "mmark-md";
@@ -48,5 +47,10 @@ project ./. ({ pkgs, ... }: {
       sha256 = "1dx1vppcwjvlnh665dpv6wifn8fiwxqgsn279k1byzxgz4h8n31i";
     };
   };
-})
 
+  overrides = self: super: with pkgs.haskell.lib; {
+    clay = dontCheck super.clay;
+    mmark = dontCheck super.mmark;
+    email-validate = dontCheck super.email-validate;
+  };
+})
