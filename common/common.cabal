@@ -15,6 +15,7 @@ library
                , these
                , universe
                , reflex
+               , template-haskell
 
   exposed-modules:
     Common.Api

@@ -5,17 +5,21 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 module Frontend where
 
+import Data.ByteString (ByteString)
+import Data.FileEmbed
 import Data.Monoid hiding ((<>))
 import Data.Semigroup ((<>))
 import Data.Text (Text)
-import Reflex.Dom.Core
+import qualified Data.Text.Encoding as T
 
+-- import Language.Javascript.JSaddle
 import Obelisk.Route.Frontend
+import Reflex.Dom.Core
 import Static
-
 
 import Common.Route
 
@@ -37,9 +41,10 @@ frontend = (head', body)
       elAttr "link" ("rel" =: "stylesheet" <> "type" =: "text/css" <> "href" =: static @"semantic.min.css") blank
       el "style" $ text appCssStr
     body = runRouteViewT routeComponentEncoder routeRestEncoder
-      (\_ -> title) (\_ -> Route_Landing :/ ()) $ subRoute_ $ \case
-        Route_Landing -> landingPage
-        Route_About -> aboutPage
+      (\_ -> title) (\_ -> Route_Landing :/ ()) $ subRoute_ $ \r ->
+      pageTemplate $ do
+        _ <- fetchMarkdown "foo"
+        divClass "markdown" $ markdownView $ getRouteMarkdown r
 
 pageTemplate :: (DomBuilder t m, EventWriter t (Endo (R Route)) m) => m a -> m a
 pageTemplate page = divClass "ui container" $ do
@@ -47,25 +52,13 @@ pageTemplate page = divClass "ui container" $ do
   divClass "ui attached segment" $
     elAttr "div" ("id" =: "content") $ page
 
-landingPage :: (DomBuilder t m, EventWriter t (Endo (R Route)) m) => m ()
-landingPage = pageTemplate $ do
-  -- el "p" $ do
-  --   l <- aLink $ text "About"
-  --   tellEvent $ Endo (const $ Route_About :/ ()) <$ l
-  divClass "markdown" $ markdownView
-    "# Welcome!\n\
-    \\n\
-    \This website is work in progress. Meanwhile you may \n\
-    \[look at my resume](https://stackoverflow.com/story/sridca) or\n\
-    \[look at the source code](https://github.com/srid/revue) for this site."
+getRouteMarkdown :: Route a -> Text
+getRouteMarkdown = \case
+  Route_Landing -> T.decodeUtf8 landingMd
+  Route_About -> "TODO"
 
--- TODO: remove
-aboutPage :: (DomBuilder t m, EventWriter t (Endo (R Route)) m) => m ()
-aboutPage = pageTemplate $ do
-  el "h2" $ text "About - Unused"
-  el "p" $ do
-    l <- aLink $ text "Home"
-    tellEvent $ Endo (const $ Route_Landing :/ ()) <$ l
+landingMd :: ByteString
+landingMd = $(embedFile "static/markdown/landing.md")
 
 -- TODO: Move to Widget.hs
 

@@ -17,6 +17,7 @@ import Data.Monoid
 import Data.Text (Text)
 import qualified Data.Text as T
 
+import Language.Javascript.JSaddle
 import Obelisk.Route.Frontend
 import Reflex.Dom.Core hiding (Link)
 
@@ -68,4 +69,18 @@ markdownView source = case MMark.parse "<nofile>" source of
           , (titleAttr =:) <$> title
           ]
 
-
+-- FIXME: can't use this with runRouteViewT (constraint violations)
+fetchMarkdown ::
+  ( PostBuild t m
+  , TriggerEvent t m
+  , PerformEvent t m
+  , MonadJSM m
+  , MonadJSM (Performable m)
+  , HasJSContext (Performable m)
+  )
+  => Text -> m (Event t Text)
+fetchMarkdown url = do
+  let req = xhrRequest "GET" url def
+  pb <- getPostBuild
+  asyncReq <- performRequestAsync (tag (constant req) pb)
+  pure $ fmap (fromMaybe "    fetchMarkdown: Unknown error" . _xhrResponse_responseText) asyncReq
