@@ -11,6 +11,8 @@ library
                , common
                , frontend
                , obelisk-backend
+               , dependent-sum
+               , dependent-sum-template
   exposed-modules:
     Backend
   ghc-options: -Wall
@@ -24,6 +26,8 @@ executable backend
                , backend
                , common
                , frontend
+               , dependent-sum
+               , dependent-sum-template
                , lens
                , modern-uri
                , obelisk-backend

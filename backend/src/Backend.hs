@@ -1,17 +1,22 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternGuards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 module Backend where
 
-import Data.Text (Text)
+import Data.Dependent.Sum (DSum (..))
+import Data.Functor.Identity
 
 import Obelisk.Backend as Ob
-import Obelisk.Route
 
 import Common.Route
-import Frontend
 
-backend :: Either Text (IO ())
-backend = do
-  let backendConfig = BackendConfig
-        { _backendConfig_frontend = frontend
-        , _backendConfig_routeEncoder = obeliskRouteEncoder routeComponentEncoder routeRestEncoder --TODO: Factor this out so that it isn't partially redundant with _frontend_routeEncoder
-        }
-  Ob.backend backendConfig
+backend :: Backend BackendRoute Route
+backend = Backend
+  { _backend_routeEncoder = backendRouteEncoder
+  , _backend_run = \serve -> serve $ \case
+      BackendRoute_NoOp :=> Identity () -> pure ()
+  }

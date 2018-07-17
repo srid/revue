@@ -48,7 +48,6 @@ frontend = Frontend
         divClass "markdown" . markdownView . getRouteMarkdown
   , _frontend_title = \_ -> title
   , _frontend_notFoundRoute = \_ -> Route_Landing :/ ()
-  , _frontend_routeEncoder = obeliskRouteEncoder routeComponentEncoder routeRestEncoder . Encoder (pure $ prismValidEncoder $ rPrism _ObeliskRoute_App) --TODO: Deal with failure
   }
 
 pageTemplate :: (DomBuilder t m, EventWriter t (Endo (R Route)) m) => m a -> m a

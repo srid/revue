@@ -51,6 +51,9 @@ project ./. ({ pkgs, ... }: {
   overrides = self: super: with pkgs.haskell.lib; {
     clay = dontCheck super.clay;
     mmark = dontCheck super.mmark;
+    megaparsec = dontCheck super.megaparsec;
+    text-metrics = dontCheck super.text-metrics;
+    mockery = dontCheck super.mockery;
     email-validate = dontCheck super.email-validate;
   };
 })

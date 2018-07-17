@@ -9,6 +9,6 @@ revue uses Obelisk. Use `ob run` to run locally, and `nix-build -A exe` (or `ob 
 ## Roadmap
 
 - [X] Use markdown (only in frontend)
-- [ ] Retrieve markdown from the backend
-- [ ] Extract markdown rendering as separate reflex-dom library
+- [ ] Retrieve markdown from the backend (and use mmark from backend)
+- [ ] Extract markdown rendering as separate reflex-dom library (just StaticWidget due to [yaml blocker](https://github.com/mmark-md/mmark/issues/54))
   - [ ] with Haskell syntax highlighting ([cf](https://github.com/mrkkrp/ghc-syntax-highlighter))
