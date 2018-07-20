@@ -14,7 +14,6 @@ import Prelude hiding (id, (.))
 import Control.Category
 import Data.ByteString (ByteString)
 import Data.FileEmbed
-import Data.Monoid hiding ((<>))
 import Data.Semigroup ((<>))
 import Data.Text (Text)
 import qualified Data.Text.Encoding as T
@@ -50,7 +49,7 @@ frontend = Frontend
   , _frontend_notFoundRoute = \_ -> Route_Landing :/ ()
   }
 
-pageTemplate :: (DomBuilder t m, EventWriter t (Endo (R Route)) m) => m a -> m a
+pageTemplate :: DomBuilder t m=> m a -> m a
 pageTemplate page = divClass "ui container" $ do
   divClass "ui top attached inverted header" $ el "h1" $ text title
   divClass "ui attached segment" $
@@ -60,6 +59,7 @@ getRouteMarkdown :: Route a -> Text
 getRouteMarkdown = \case
   Route_Landing -> T.decodeUtf8 landingMd
 
+-- TODO: Don't embed, but pull from backend.
 landingMd :: ByteString
 landingMd = $(embedFile "static/markdown/landing.md")
 

@@ -13,21 +13,17 @@ import Control.Foldl hiding (mconcat)
 import Control.Monad (forM_)
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe (catMaybes, fromMaybe)
-import Data.Monoid
 import Data.Text (Text)
 import qualified Data.Text as T
 
 import Language.Javascript.JSaddle
-import Obelisk.Route.Frontend
 import Reflex.Dom.Core hiding (Link)
 
 import qualified Text.MMark as MMark
 import Text.MMark.Extension (Block (..), Inline (..))
 import qualified Text.URI as URI
 
-import Common.Route (Route)
-
-markdownView :: (DomBuilder t m, EventWriter t (Endo (R Route)) m) => Text -> m ()
+markdownView :: (DomBuilder t m) => Text -> m ()
 markdownView source = case MMark.parse "<nofile>" source of
   Left errs -> elClass "tt" "markdown-error" $
     text $ T.pack (MMark.parseErrorsPretty source errs)
@@ -74,7 +70,6 @@ fetchMarkdown ::
   ( PostBuild t m
   , TriggerEvent t m
   , PerformEvent t m
-  , MonadJSM m
   , MonadJSM (Performable m)
   , HasJSContext (Performable m)
   )
