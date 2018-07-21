@@ -13,6 +13,9 @@ import Data.ByteString (ByteString)
 import Data.Dependent.Sum (DSum (..))
 import Data.FileEmbed
 import Data.Functor.Identity
+import Data.List (find)
+import Data.Maybe (fromMaybe)
+import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import Snap
 
@@ -27,12 +30,20 @@ import Backend.Markdown (markdownView)
 landingMd :: ByteString
 landingMd = $(embedFile "page/landing.md")
 
+sources :: [(FilePath, ByteString)]
+sources = $(embedDir "page")
+
+getSource :: FilePath -> Maybe ByteString
+getSource s = fmap snd $ flip find sources $ \(fn, _) -> fn == s
+
 backend :: Backend BackendRoute Route
 backend = Backend
   { _backend_routeEncoder = backendRouteEncoder
   , _backend_run = \serve -> serve $ \case
       BackendRoute_GetPage :=> Identity () -> do
+        name <- fromMaybe "landing.md" <$> getParam "source"
+        let Just content = getSource $ T.unpack $ T.decodeUtf8 name
         ((), v) <- liftIO $ renderStatic $ do
-          markdownView $ T.decodeUtf8 landingMd
+          markdownView $ T.decodeUtf8 content
         writeBS v
   }

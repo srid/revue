@@ -40,7 +40,9 @@ frontend = Frontend
       el "title" $ text title
       elAttr "link" ("rel" =: "stylesheet" <> "type" =: "text/css" <> "href" =: static @"semantic.min.css") blank
       el "style" $ text appCssStr
-  , _frontend_body = pageTemplate $ subRoute_ $ \_r -> do
+  , _frontend_body = pageTemplate $ subRoute_ $ \r -> do
+        -- TODO: pass `r` as query param to GetPage.
+        -- FIXME: the encoder stuff complaints for this.
         c <- prerender (pure never) $
           fetchContent $ backendRoute BackendRoute_GetPage
         t :: Dynamic t Text <- holdDyn "Loading..." c
@@ -52,6 +54,9 @@ frontend = Frontend
   where
     Right backendRouteValidEncoder = checkEncoder $ obeliskRouteEncoder backendRouteComponentEncoder backendRouteRestEncoder
     backendRoute r = T.intercalate "/" $ fst $ _validEncoder_encode backendRouteValidEncoder $ ObeliskRoute_App r :/ ()
+    -- sourceForRoute = \case
+    --   Route_Landing -> "landing.md"
+    --   Route_Page s -> s <> ".md"
 
 pageTemplate :: DomBuilder t m=> m a -> m a
 pageTemplate page = divClass "ui container" $ do

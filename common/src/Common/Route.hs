@@ -57,10 +57,13 @@ instance Universe (Some BackendRoute) where
 
 data Route :: * -> * where
   Route_Landing :: Route ()
+  Route_Page :: Text -> Route ()
 
 instance Universe (Some Route) where
   universe =
     [ Some.This Route_Landing
+    -- TODO: Not sure this is how we add pages??
+    , Some.This $ Route_Page "haskell"
     ]
 
 instance Universe (R Route) where
@@ -73,24 +76,29 @@ routeComponentEncoder
   => Encoder check parse (Some Route) (Maybe Text)
 routeComponentEncoder = enum1Encoder $ \case
   Route_Landing -> Nothing
+  Route_Page s -> Just s
 
 routeRestEncoder
   :: (Applicative check, MonadError Text parse)
   => Route a -> Encoder check parse a PageName
 routeRestEncoder = Encoder . pure . \case
   Route_Landing -> endValidEncoder mempty
+  Route_Page _ -> endValidEncoder mempty
 
 instance ShowTag Route Identity where
   showTaggedPrec = \case
     Route_Landing -> showsPrec
+    Route_Page _ -> showsPrec
 
 instance EqTag Route Identity where
   eqTagged = \case
     Route_Landing -> \_ -> (==)
+    Route_Page _ -> \_ -> (==)
 
 instance OrdTag Route Identity where
   compareTagged = \case
     Route_Landing -> \_ -> compare
+    Route_Page _ -> \_ -> compare
 
 deriveGShow ''Route
 deriveGEq ''Route

@@ -10,7 +10,7 @@
 module Backend.Markdown where
 
 import Control.Foldl hiding (mconcat)
-import Control.Monad (forM_)
+import Control.Monad (forM, forM_)
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe (catMaybes, fromMaybe)
 import Data.Text (Text)
@@ -37,13 +37,15 @@ markdownView source = case MMark.parse "<nofile>" source of
       Heading5 xs -> el "h5" $ renderInlines xs
       Heading6 xs -> el "h6" $ renderInlines xs
       CodeBlock info xs -> el "pre" $ elClass "code" (fromMaybe "" info) $ text xs
-      Naked xs -> el "tt" $ do
-        text $ "TODO: Naked"
+      Naked xs -> do
+        -- text $ "TODO: Naked"
         renderInlines xs
       Paragraph xs -> el "p" $ renderInlines xs
       Blockquote bs -> el "blockquote" $ flip forM_ renderBlock bs
       OrderedList _start _bs -> el "ol" $ el "tt" $ text "TODO: OrderedList"
-      UnorderedList _bs -> el "ol" $ el "tt" $ text "TODO: UnorderedList"
+      UnorderedList bs -> el "ol" $ do
+        forM_ bs $ \b -> do
+          el "li" $ forM b renderBlock
       Table _ _ -> el "tt" $ text "TODO: Table"
     renderInlines = flip forM_ renderInline . NE.toList
     renderInline = \case
