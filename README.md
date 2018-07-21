@@ -21,7 +21,7 @@ These pages get embedded automatically during Haskell compilation. Each page aut
 (These instructions are for my own site--srid.ca)
 
 ```
-git add ... && git commit -m '...'
+# Commit any changes first.
 ./publish.sh
 ```
 

@@ -40,6 +40,9 @@ appCss = do
   "h1, h2, h3, h4, h5, h6" ? do
     important $ fontFamily [snd headerFont] [cursive]
 
+  "h1" ? do
+    cursor pointer
+
   "code, pre, tt" ? do
     important $ fontFamily [snd monoFont] [monospace]
 
@@ -54,3 +57,6 @@ appCss = do
       width $ pct 50
       sym margin auto
       sym padding $ em 1
+
+    ".footer" ? do
+      textAlign center

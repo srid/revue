@@ -50,25 +50,24 @@ frontend = Frontend
 
         divClass "ui container" $ do
           divClass "ui top attached inverted header" $ do
-            evt <- click' $ el' "h1" $ el "a" $ text title
-            -- TODO: Use tellEvent (instead of href links) inside of Markdown
-            -- rendered content as well.
+            evt <- click' $ el' "h1" $ text title
             tellEvent $ Endo (const $ Route_Landing :/ ()) <$ evt
           divClass "ui attached segment" $
             elAttr "div" ("id" =: "content") $ do
               divClass "markdown" $ do
                 prerender blank $ void $ elDynHtml' "div" content
+          divClass "ui secondary bottom attached segment" $ do
+            divClass "footer" $ do
+              elAttr "a" ("href" =: projectUrl) $ text "Powered by Haskell"
   , _frontend_title = \_ -> title
   , _frontend_notFoundRoute = \_ -> Route_Landing :/ ()
   }
   where
+    projectUrl = "https://github.com/srid/revue" :: Text
     Right backendRouteValidEncoder = checkEncoder $ obeliskRouteEncoder backendRouteComponentEncoder backendRouteRestEncoder
     backendRoute r = T.intercalate "/" $ fst $ _validEncoder_encode backendRouteValidEncoder $ ObeliskRoute_App r :/ ()
 
 -- TODO: Move to Widget.hs
-
-aLink :: DomBuilder t m => m () -> m (Event t ())
-aLink body = click' $ el' "a" body
 
 click'
   :: (HasDomEvent t target 'ClickTag, Functor m)
