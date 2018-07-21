@@ -3,7 +3,6 @@
 Here's some Haskell:
 
 ```haskell
-import System
 frontend :: (StaticWidget x (), Widget x ())
 frontend = (head', body)
   where
