@@ -14,6 +14,7 @@ import Prelude hiding (id, (.))
 import Control.Category
 import Control.Monad (void)
 import Data.Maybe (fromMaybe)
+import Data.Monoid hiding ((<>))
 import Data.Semigroup ((<>))
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -41,13 +42,17 @@ frontend = Frontend
       elAttr "link" ("rel" =: "stylesheet" <> "type" =: "text/css" <> "href" =: static @"semantic.min.css") blank
       el "style" $ text appCssStr
   , _frontend_body = subRoute_ $ \r -> do
+        -- FIXME: This fetches 3 times for some reason.
         resp <- prerender (pure never) $ fetchContent $ backendRoute $ case r of
           Route_Landing -> BackendRoute_GetPage "landing.md"
           Route_Page s -> BackendRoute_GetPage $ s <> ".md"
-        content :: Dynamic t Text <- holdDyn "Loading..." resp
+        content :: Dynamic t Text <- holdDyn "Loading..." $ traceEvent "Got resp:" resp
         divClass "ui container" $ do
           divClass "ui top attached inverted header" $ do
-            el "h1" $ elAttr "a" ("href" =: "/") $ text title
+            evt <- click' $ el' "h1" $ el "a" $ text title
+            -- TODO: Use tellEvent (instead of href links) inside of Markdown
+            -- rendered content as well.
+            tellEvent $ Endo (const $ Route_Landing :/ ()) <$ evt
           divClass "ui attached segment" $
             elAttr "div" ("id" =: "content") $ do
               divClass "markdown" $ do
