@@ -2,13 +2,14 @@
 , iosSdkVersion ? "10.2"
 }:
 with import ./.obelisk/impl { inherit system iosSdkVersion; };
-project ./. ({ pkgs, ... }: {
+project ./. ({ pkgs, hackGet, ... }: {
   android.applicationId = "ca.srid.revue.dev";
   android.displayName = "Revue (srid)";
   ios.bundleIdentifier = "ca.srid.revue.dev";
   ios.bundleName = "Revue (srid)";
 
   packages = {
+    file-embed = hackGet ./dep/file-embed;
     clay = pkgs.fetchFromGitHub {
       owner = "sebastiaanvisser";
       repo = "clay";

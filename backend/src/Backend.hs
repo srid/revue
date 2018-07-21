@@ -23,15 +23,13 @@ import Reflex.Dom.Core
 
 import Obelisk.Backend as Ob
 
+import Common.Api
 import Common.Route
 
 import Backend.Markdown (markdownView)
 
-landingMd :: ByteString
-landingMd = $(embedFile "page/landing.md")
-
 sources :: [(FilePath, ByteString)]
-sources = $(embedDir "page")
+sources = $(embedDir sourceDir)
 
 getSource :: FilePath -> Maybe ByteString
 getSource s = fmap snd $ flip find sources $ \(fn, _) -> fn == s

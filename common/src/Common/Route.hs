@@ -15,6 +15,7 @@ import Obelisk.Route
 import Control.Category
 import Control.Monad.Except
 import Data.Dependent.Sum
+import Data.FileEmbed
 import Data.Functor.Identity
 import Data.Functor.Sum
 import Data.GADT.Compare.TH
@@ -22,7 +23,11 @@ import Data.GADT.Show.TH
 import Data.Some (Some)
 import qualified Data.Some as Some
 import Data.Text (Text)
+import qualified Data.Text as T
 import Data.Universe
+import System.FilePath (FilePath)
+
+import Common.Api
 
 backendRouteEncoder
   :: ( check ~ parse
@@ -50,11 +55,14 @@ backendRouteRestEncoder :: (Applicative check, MonadError Text parse) => Backend
 backendRouteRestEncoder = Encoder . pure . \case
   BackendRoute_GetPage _ -> endValidEncoder mempty
 
+pages :: [FilePath]
+pages = $(embedDirListing sourceDir)
+  -- [ "landing.md"
+  -- , "haskell.md"
+  -- ]
+
 instance Universe (Some BackendRoute) where
-  universe =
-    [ Some.This $ BackendRoute_GetPage "landing.md"
-    , Some.This $ BackendRoute_GetPage "haskell.md"
-    ]
+  universe = Some.This . BackendRoute_GetPage . T.pack <$> pages
 
 data Route :: * -> * where
   Route_Landing :: Route ()

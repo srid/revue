@@ -5,5 +5,3 @@ This website is work in progress. Meanwhile you may [look at my resume](https://
 ## What's available so far
 
 - [Haskell](haskell)
-
-*-srid*
