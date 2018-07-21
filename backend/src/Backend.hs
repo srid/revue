@@ -24,10 +24,8 @@ import Common.Route
 
 import Backend.Markdown (markdownView)
 
--- FIXME: This path doesn't work with full ghc compile.
--- Needs to drop the "backend/"
 landingMd :: ByteString
-landingMd = $(embedFile "backend/src/page/landing.md")
+landingMd = $(embedFile "page/landing.md")
 
 backend :: Backend BackendRoute Route
 backend = Backend
