@@ -16,6 +16,15 @@ echo "This is _markdown_ content" > page/hello.md
 
 These pages get embedded automatically during Haskell compilation. Each page automatically gets its own route. For example, the `page/hello.md` content can be accessed from the frontend as `http://localhost:8000/hello` (append `.md` to the URL to view the markdown source).
 
+## Publishing new content
+
+(These instructions are for my own site--srid.ca)
+
+```
+git add ... && git commit -m '...'
+./publish.sh
+```
+
 ## Roadmap
 
 https://github.com/srid/revue/projects/1?add_cards_query=is%3Aopen
