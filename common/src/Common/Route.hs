@@ -34,25 +34,26 @@ backendRouteEncoder = Encoder $ do
   myObeliskRestValidEncoder <- checkObeliskRouteRestEncoder routeRestEncoder
   checkEncoder $ pathComponentEncoder myComponentEncoder $ \case
     InL backendRoute -> case backendRoute of
-      BackendRoute_GetPage -> endValidEncoder mempty
+      BackendRoute_GetPage _ -> endValidEncoder mempty
     InR obeliskRoute -> runValidEncoderFunc myObeliskRestValidEncoder obeliskRoute
 
 --TODO: Should we rename `Route` to `AppRoute`?
 data BackendRoute :: * -> * where
   --TODO: How do we do routes with strongly-typed results?
-  BackendRoute_GetPage :: BackendRoute ()
+  BackendRoute_GetPage :: Text -> BackendRoute ()
 
 backendRouteComponentEncoder :: (MonadError Text check, MonadError Text parse) => Encoder check parse (Some BackendRoute) (Maybe Text)
-backendRouteComponentEncoder = enum1Encoder $ \case
-  BackendRoute_GetPage -> Just "get-page"
+backendRouteComponentEncoder = enumEncoder $ \case
+  Some.This (BackendRoute_GetPage s) -> Just s
 
 backendRouteRestEncoder :: (Applicative check, MonadError Text parse) => BackendRoute a -> Encoder check parse a PageName
 backendRouteRestEncoder = Encoder . pure . \case
-  BackendRoute_GetPage-> endValidEncoder mempty
+  BackendRoute_GetPage _ -> endValidEncoder mempty
 
 instance Universe (Some BackendRoute) where
   universe =
-    [ Some.This BackendRoute_GetPage
+    [ Some.This $ BackendRoute_GetPage "landing.md"
+    , Some.This $ BackendRoute_GetPage "haskell.md"
     ]
 
 data Route :: * -> * where

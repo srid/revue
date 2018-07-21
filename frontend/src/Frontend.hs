@@ -41,26 +41,23 @@ frontend = Frontend
       elAttr "link" ("rel" =: "stylesheet" <> "type" =: "text/css" <> "href" =: static @"semantic.min.css") blank
       el "style" $ text appCssStr
   , _frontend_body = pageTemplate $ subRoute_ $ \r -> do
-        -- TODO: pass `r` as query param to GetPage.
-        -- FIXME: the encoder stuff complaints for this.
-        c <- prerender (pure never) $
-          fetchContent $ backendRoute BackendRoute_GetPage
-        t :: Dynamic t Text <- holdDyn "Loading..." c
+        resp <- prerender (pure never) $ fetchContent $ backendRoute $ case r of
+          Route_Landing -> BackendRoute_GetPage "landing.md"
+          Route_Page s -> BackendRoute_GetPage $ s <> ".md"
+        content :: Dynamic t Text <- holdDyn "Loading..." resp
         divClass "markdown" $ do
-          prerender blank $ void $ elDynHtml' "div" t
+          prerender blank $ void $ elDynHtml' "div" content
   , _frontend_title = \_ -> title
   , _frontend_notFoundRoute = \_ -> Route_Landing :/ ()
   }
   where
     Right backendRouteValidEncoder = checkEncoder $ obeliskRouteEncoder backendRouteComponentEncoder backendRouteRestEncoder
     backendRoute r = T.intercalate "/" $ fst $ _validEncoder_encode backendRouteValidEncoder $ ObeliskRoute_App r :/ ()
-    -- sourceForRoute = \case
-    --   Route_Landing -> "landing.md"
-    --   Route_Page s -> s <> ".md"
 
-pageTemplate :: DomBuilder t m=> m a -> m a
+pageTemplate :: DomBuilder t m => m a -> m a
 pageTemplate page = divClass "ui container" $ do
-  divClass "ui top attached inverted header" $ el "h1" $ text title
+  divClass "ui top attached inverted header" $ do
+    el "h1" $ elAttr "a" ("href" =: "/") $ text title
   divClass "ui attached segment" $
     elAttr "div" ("id" =: "content") $ page
 

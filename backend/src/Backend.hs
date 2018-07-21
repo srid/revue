@@ -14,9 +14,9 @@ import Data.Dependent.Sum (DSum (..))
 import Data.FileEmbed
 import Data.Functor.Identity
 import Data.List (find)
-import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
+import qualified Data.Text.IO as T
 import Snap
 
 import Reflex.Dom.Core
@@ -40,9 +40,9 @@ backend :: Backend BackendRoute Route
 backend = Backend
   { _backend_routeEncoder = backendRouteEncoder
   , _backend_run = \serve -> serve $ \case
-      BackendRoute_GetPage :=> Identity () -> do
-        name <- fromMaybe "landing.md" <$> getParam "source"
-        let Just content = getSource $ T.unpack $ T.decodeUtf8 name
+      BackendRoute_GetPage s :=> Identity () -> do
+        liftIO $ T.putStrLn s
+        let Just content = getSource $ T.unpack s
         ((), v) <- liftIO $ renderStatic $ do
           markdownView $ T.decodeUtf8 content
         writeBS v
