@@ -8,8 +8,4 @@ revue uses Obelisk. Use `ob run` to run locally, and `nix-build -A exe` (or `ob 
 
 ## Roadmap
 
-- [X] Use markdown (only in frontend)
-- [ ] Start using sub routes (eg: /wiki/whatever)
-- [ ] Have backend do the markdown conversion
-  - [ ] Extract markdown rendering as separate reflex-dom library (just StaticWidget due to [yaml blocker](https://github.com/mmark-md/mmark/issues/54))
-    - [ ] with Haskell syntax highlighting ([cf](https://github.com/mrkkrp/ghc-syntax-highlighter))
+https://github.com/srid/revue/projects/1?add_cards_query=is%3Aopen

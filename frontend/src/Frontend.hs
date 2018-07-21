@@ -12,26 +12,23 @@ module Frontend where
 import Prelude hiding (id, (.))
 
 import Control.Category
-import Data.ByteString (ByteString)
-import Data.FileEmbed
+import Control.Monad (void)
+import Data.Maybe (fromMaybe)
 import Data.Semigroup ((<>))
 import Data.Text (Text)
-import qualified Data.Text.Encoding as T
+import qualified Data.Text as T
 
--- import Language.Javascript.JSaddle
+import Language.Javascript.JSaddle
+import Reflex.Dom.Core
+
 import Obelisk.Frontend
 import Obelisk.Route.Frontend
-import Reflex.Dom.Core
 
 import Static
 
 import Common.Route
 
 import Frontend.Css (appCssStr)
-import Frontend.Markdown
-
--- TODO: As soon as obelisk backend routing is ready, move content as markdown
--- to the backend (or have backend fetch it from elsewhere).
 
 title :: Text
 title = "Sridhar Ratnakumar"
@@ -43,25 +40,24 @@ frontend = Frontend
       el "title" $ text title
       elAttr "link" ("rel" =: "stylesheet" <> "type" =: "text/css" <> "href" =: static @"semantic.min.css") blank
       el "style" $ text appCssStr
-  , _frontend_body = pageTemplate $ subRoute_ $
-        divClass "markdown" . markdownView . getRouteMarkdown
+  , _frontend_body = pageTemplate $ subRoute_ $ \_r -> do
+        c <- prerender (pure never) $
+          fetchContent $ backendRoute BackendRoute_GetPage
+        t :: Dynamic t Text <- holdDyn "Loading..." c
+        divClass "markdown" $ do
+          prerender blank $ void $ elDynHtml' "div" t
   , _frontend_title = \_ -> title
   , _frontend_notFoundRoute = \_ -> Route_Landing :/ ()
   }
+  where
+    Right backendRouteValidEncoder = checkEncoder $ obeliskRouteEncoder backendRouteComponentEncoder backendRouteRestEncoder
+    backendRoute r = T.intercalate "/" $ fst $ _validEncoder_encode backendRouteValidEncoder $ ObeliskRoute_App r :/ ()
 
 pageTemplate :: DomBuilder t m=> m a -> m a
 pageTemplate page = divClass "ui container" $ do
   divClass "ui top attached inverted header" $ el "h1" $ text title
   divClass "ui attached segment" $
     elAttr "div" ("id" =: "content") $ page
-
-getRouteMarkdown :: Route a -> Text
-getRouteMarkdown = \case
-  Route_Landing -> T.decodeUtf8 landingMd
-
--- TODO: Don't embed, but pull from backend.
-landingMd :: ByteString
-landingMd = $(embedFile "static/markdown/landing.md")
 
 -- TODO: Move to Widget.hs
 
@@ -73,3 +69,18 @@ click'
   => m (target, a)
   -> m (Event t (DomEventType target 'ClickTag))
 click' = fmap (domEvent Click . fst)
+
+-- TODO: change this to toplevel dynamic
+fetchContent ::
+  ( PostBuild t m
+  , TriggerEvent t m
+  , PerformEvent t m
+  , MonadJSM (Performable m)
+  , HasJSContext (Performable m)
+  )
+  => Text -> m (Event t Text)
+fetchContent url = do
+  let req = xhrRequest "GET" url def
+  pb <- getPostBuild
+  asyncReq <- performRequestAsync (tag (constant req) pb)
+  pure $ fmap (fromMaybe "    fetchMarkdown: Unknown error" . _xhrResponse_responseText) asyncReq

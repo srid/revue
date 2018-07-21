@@ -9,12 +9,21 @@ library
     buildable: False
   build-depends: base
                , common
+               , text
+               , foldl
+               , file-embed
+               , snap
+               , bytestring
+               , reflex-dom-core
                , frontend
                , obelisk-backend
                , dependent-sum
                , dependent-sum-template
+               , mmark
+               , modern-uri
   exposed-modules:
     Backend
+    Backend.Markdown
   ghc-options: -Wall
 
 executable backend
@@ -25,6 +34,12 @@ executable backend
   build-depends: base
                , backend
                , common
+               , text
+               , foldl
+               , file-embed
+               , snap
+               , bytestring
+               , reflex-dom-core
                , frontend
                , dependent-sum
                , dependent-sum-template
@@ -34,3 +49,5 @@ executable backend
                , obelisk-executable-config
                , obelisk-executable-config-inject
                , text
+               , mmark
+               , modern-uri

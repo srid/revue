@@ -8,18 +8,17 @@ library
   build-depends: base
                , common
                , reflex-dom
-               , foldl
                , static
                , text
                , string-conv
                , obelisk-route
+               , obelisk-frontend
                , clay
-               , mmark
                , modern-uri
+               , jsaddle
   exposed-modules:
     Frontend
     Frontend.Css
-    Frontend.Markdown
   ghc-options: -Wall
 
 executable frontend
@@ -29,14 +28,14 @@ executable frontend
                , common
                , reflex-dom
                , static
-               , foldl
                , text
                , frontend
                , string-conv
                , obelisk-route
+               , obelisk-frontend
                , clay
-               , mmark
                , modern-uri
+               , jsaddle
   --TODO: Make these ghc-options optional
   ghc-options: -threaded
   if os(darwin)
