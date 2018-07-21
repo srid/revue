@@ -14,6 +14,7 @@ import Obelisk.Route
 
 import Control.Category
 import Control.Monad.Except
+import Data.ByteString (ByteString)
 import Data.Dependent.Sum
 import Data.FileEmbed
 import Data.Functor.Identity
@@ -57,9 +58,12 @@ backendRouteRestEncoder = Encoder . pure . \case
 
 pages :: [FilePath]
 pages = $(embedDirListing sourceDir)
-  -- [ "landing.md"
-  -- , "haskell.md"
-  -- ]
+
+-- FIXME: This should live in the backend, however unfortunately full ghc
+-- build if the content exists only in one of common and backend packages.
+-- To workaround, we move all TH stuff to the package where the content lives.
+pageContent :: [(FilePath, ByteString)]
+pageContent = $(embedDir sourceDir)
 
 instance Universe (Some BackendRoute) where
   universe = Some.This . BackendRoute_GetPage . T.pack <$> pages
