@@ -59,6 +59,10 @@ backendRouteRestEncoder = Encoder . pure . \case
 pages :: [FilePath]
 pages = $(embedDirListing sourceDir)
 
+-- | Gets the user facing route path for a page.
+routeForPage :: FilePath -> Text
+routeForPage = fst . T.breakOn ".md" . T.pack
+
 -- FIXME: This should live in the backend, however unfortunately full ghc
 -- build if the content exists only in one of common and backend packages.
 -- To workaround, we move all TH stuff to the package where the content lives.
@@ -75,9 +79,7 @@ data Route :: * -> * where
 instance Universe (Some Route) where
   universe =
     [ Some.This Route_Landing
-    -- TODO: Not sure this is how we add pages??
-    , Some.This $ Route_Page "haskell"
-    ]
+    ] <> (Some.This . Route_Page . routeForPage <$> pages)
 
 instance Universe (R Route) where
   universe =
