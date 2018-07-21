@@ -42,11 +42,12 @@ frontend = Frontend
       elAttr "link" ("rel" =: "stylesheet" <> "type" =: "text/css" <> "href" =: static @"semantic.min.css") blank
       el "style" $ text appCssStr
   , _frontend_body = subRoute_ $ \r -> do
-        -- FIXME: This fetches 3 times for some reason.
         resp <- prerender (pure never) $ fetchContent $ backendRoute $ case r of
           Route_Landing -> BackendRoute_GetPage "landing.md"
           Route_Page s -> BackendRoute_GetPage $ s <> ".md"
-        content :: Dynamic t Text <- holdDyn "Loading..." $ traceEvent "Got resp:" resp
+        content' :: Dynamic t Text <- holdDyn "Loading..." resp
+        content <- holdUniqDyn content'  -- To workaround a bug in fetchContent
+
         divClass "ui container" $ do
           divClass "ui top attached inverted header" $ do
             evt <- click' $ el' "h1" $ el "a" $ text title
@@ -56,7 +57,7 @@ frontend = Frontend
           divClass "ui attached segment" $
             elAttr "div" ("id" =: "content") $ do
               divClass "markdown" $ do
-                prerender blank $ void $ elDynHtml' "div" content
+                prerender blank $ void $ elDynHtml' "div" $ traceDyn "content" content
   , _frontend_title = \_ -> title
   , _frontend_notFoundRoute = \_ -> Route_Landing :/ ()
   }
@@ -87,5 +88,6 @@ fetchContent ::
 fetchContent url = do
   let req = xhrRequest "GET" url def
   pb <- getPostBuild
-  asyncReq <- performRequestAsync (tag (constant req) pb)
-  pure $ fmap (fromMaybe "    fetchMarkdown: Unknown error" . _xhrResponse_responseText) asyncReq
+  -- FIXME: Why is asyncReq firing 3 times?
+  responses <- performRequestAsync $ req <$ pb
+  pure $ fmap (fromMaybe "    fetchContent: Unknown error" . _xhrResponse_responseText) responses
