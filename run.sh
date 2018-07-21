@@ -6,4 +6,4 @@ set -xe
 export PORT=9005
 
 touch .entr
-ls result | entr -d sh -c 'cd result; ./backend -p $PORT'
+ls .entr | entr -d sh -c 'cd result; ./backend -p $PORT'
