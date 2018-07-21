@@ -25,10 +25,14 @@ mainFont = ("Comfortaa:700", "Comfortaa")
 headerFont :: (Text, Text)
 headerFont = ("Chela+One", "Chela One")
 
+monoFont :: (Text, Text)
+monoFont = ("Roboto+Mono", "Roboto Mono")
+
 appCss :: Css
 appCss = do
   importUrl $ "https://fonts.googleapis.com/css?family=" <> fst mainFont
   importUrl $ "https://fonts.googleapis.com/css?family=" <> fst headerFont
+  importUrl $ "https://fonts.googleapis.com/css?family=" <> fst monoFont
 
   "#content" ? do
     important $ fontFamily [snd mainFont] [sansSerif]
@@ -36,11 +40,17 @@ appCss = do
   "h1, h2, h3, h4, h5, h6" ? do
     important $ fontFamily [snd headerFont] [cursive]
 
+  "code, pre, tt" ? do
+    important $ fontFamily [snd monoFont] [monospace]
+
   ".header h1" ? do
     textAlign center
     important $ color themeColor
 
-  -- ".markdown" ? do
-  --   border solid (px 1) black
-  --   sym padding $ em 1
-  --   backgroundColor "#eee"
+  ".markdown" ? do
+    "pre" ? do
+      marginBottom $ em 1
+      backgroundColor "#eee"
+      width $ pct 50
+      sym margin auto
+      sym padding $ em 1

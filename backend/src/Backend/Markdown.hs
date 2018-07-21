@@ -22,7 +22,7 @@ import qualified Text.MMark as MMark
 import Text.MMark.Extension (Block (..), Inline (..))
 import qualified Text.URI as URI
 
-markdownView :: (DomBuilder t m) => Text -> m ()
+markdownView :: DomBuilder t m => Text -> m ()
 markdownView source = case MMark.parse "<nofile>" source of
   Left errs -> elClass "tt" "markdown-error" $
     text $ T.pack (MMark.parseErrorsPretty source errs)
@@ -36,7 +36,7 @@ markdownView source = case MMark.parse "<nofile>" source of
       Heading4 xs -> el "h4" $ renderInlines xs
       Heading5 xs -> el "h5" $ renderInlines xs
       Heading6 xs -> el "h6" $ renderInlines xs
-      CodeBlock info xs -> elClass "code" (fromMaybe "" info) $ text xs
+      CodeBlock info xs -> el "pre" $ elClass "code" (fromMaybe "" info) $ text xs
       Naked xs -> el "tt" $ do
         text $ "TODO: Naked"
         renderInlines xs
