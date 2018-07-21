@@ -45,8 +45,8 @@ frontend = Frontend
         resp <- prerender (pure never) $ fetchContent $ backendRoute $ case r of
           Route_Landing -> BackendRoute_GetPage "landing.md"
           Route_Page s -> BackendRoute_GetPage $ s <> ".md"
-        content' :: Dynamic t Text <- holdDyn "Loading..." resp
-        content <- holdUniqDyn content'  -- To workaround a bug in fetchContent
+        -- Workaround the fetchContent bug by using holdUniqDyn
+        content :: Dynamic t Text <- holdUniqDyn =<< holdDyn "Loading..." resp
 
         divClass "ui container" $ do
           divClass "ui top attached inverted header" $ do
@@ -57,7 +57,7 @@ frontend = Frontend
           divClass "ui attached segment" $
             elAttr "div" ("id" =: "content") $ do
               divClass "markdown" $ do
-                prerender blank $ void $ elDynHtml' "div" $ traceDyn "content" content
+                prerender blank $ void $ elDynHtml' "div" content
   , _frontend_title = \_ -> title
   , _frontend_notFoundRoute = \_ -> Route_Landing :/ ()
   }
