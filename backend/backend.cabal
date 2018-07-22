@@ -21,6 +21,8 @@ library
                , dependent-sum-template
                , mmark
                , modern-uri
+               , yaml
+               , aeson
   exposed-modules:
     Backend
     Backend.Markdown
@@ -51,3 +53,5 @@ executable backend
                , text
                , mmark
                , modern-uri
+               , yaml
+               , aeson

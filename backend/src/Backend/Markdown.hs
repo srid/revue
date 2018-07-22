@@ -5,28 +5,46 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Backend.Markdown where
 
 import Control.Foldl hiding (mconcat)
 import Control.Monad (forM, forM_)
+import Data.Aeson
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe (catMaybes, fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
+import qualified Data.Yaml as Yaml
 
-import Reflex.Dom.Core hiding (Link)
+import Reflex.Dom.Core hiding (Link, Value)
 
 import qualified Text.MMark as MMark
 import Text.MMark.Extension (Block (..), Inline (..))
 import qualified Text.URI as URI
 
-markdownView :: DomBuilder t m => Text -> m ()
+import Common.Api
+
+-- NOTE: This is for future; not used yet.
+parsePage :: Applicative f => MMark.MMark -> f (Maybe Page)
+parsePage r = case MMark.projectYaml r of
+  Nothing -> pure Nothing
+  Just doc -> do
+    let f = Yaml.withObject "metadata" $ \metadata -> do
+          title <- metadata .: "title"
+          pure $ Page title
+    either error (pure . Just) $ Yaml.parseEither f doc
+
+markdownView :: DomBuilder t m => Text -> m (Maybe Page)
 markdownView source = case MMark.parse "<nofile>" source of
-  Left errs -> elClass "tt" "markdown-error" $
+  Left errs -> elClass "tt" "markdown-error" $ do
     text $ T.pack (MMark.parseErrorsPretty source errs)
-  Right r -> MMark.runScannerM r $ FoldM (const renderBlock) blank pure
+    pure Nothing
+  Right r -> do
+    MMark.runScannerM r $ FoldM (const renderBlock) blank pure
+    parsePage r
   where
     renderBlock = \case
       ThematicBreak -> el "tt" $ text "TODO: ThematicBreak"

@@ -33,7 +33,7 @@ backend = Backend
   , _backend_run = \serve -> serve $ \case
       BackendRoute_GetPage s :=> Identity () -> do
         let Just content = getSource $ T.unpack s
-        ((), v) <- liftIO $ renderStatic $ do
+        (_page, html) <- liftIO $ renderStatic $ do
           markdownView $ T.decodeUtf8 content
-        writeBS v
+        writeBS html
   }
