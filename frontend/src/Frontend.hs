@@ -36,11 +36,15 @@ title = "Sridhar Ratnakumar"
 
 frontend :: Frontend (R Route)
 frontend = Frontend
-  { _frontend_head = do
+  { _frontend_head = subRoute_ $ \r -> do
       elAttr "meta" ("name" =: "viewport" <> "content" =: "width=device-width, initial-scale=1") blank
       elAttr "link" ("rel" =: "stylesheet" <> "type" =: "text/css" <> "href" =: static @"semantic.min.css") blank
       el "style" $ text appCssStr
-      el "title" $ text title  -- FIXME: Title should depend on page
+      -- FIXME: Title should actually come from the Yaml metadata, but we fetch
+      -- content in _frontend_body; how to access that Dynamic from here?
+      el "title" $ text $ case r of
+        Route_Page s -> s <> " - " <> title
+        Route_Landing -> title
   , _frontend_body = subRoute_ $ \r -> do
         resp <- prerender (pure never) $ fetchContent $ backendRoute $ case r of
           Route_Landing -> BackendRoute_GetPage "landing.md"
@@ -59,12 +63,10 @@ frontend = Frontend
           divClass "ui secondary bottom attached segment" $ do
             divClass "footer" $ do
               elAttr "a" ("href" =: projectUrl) $ text "Powered by Haskell"
-  -- FIXME: Title should actually come from the Yaml metadata, but we fetch
-  -- content in _frontend_body; how to access that Dynamic from here?
   -- TODO: Why are these titles not being set at all? See also `_frontend_head`
-  , _frontend_title = \case
-      Route_Page s :/ () -> s <> " - " <> title
-      _ -> title
+  , _frontend_title = const "WIP" -- \case
+      -- Route_Page s :/ () -> s <> " - " <> title
+      -- _ -> "boo"
   , _frontend_notFoundRoute = \_ -> Route_Landing :/ ()
   }
   where
