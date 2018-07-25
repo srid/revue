@@ -5,6 +5,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 module Common.Route where
 
@@ -21,6 +22,7 @@ import Data.Functor.Identity
 import Data.Functor.Sum
 import Data.GADT.Compare.TH
 import Data.GADT.Show.TH
+import Data.List (elem)
 import Data.Some (Some)
 import qualified Data.Some as Some
 import Data.Text (Text)
@@ -40,21 +42,21 @@ backendRouteEncoder = Encoder $ do
   myObeliskRestValidEncoder <- checkObeliskRouteRestEncoder routeRestEncoder
   checkEncoder $ pathComponentEncoder myComponentEncoder $ \case
     InL backendRoute -> case backendRoute of
-      BackendRoute_GetPage _ -> endValidEncoder mempty
+      BackendRoute_GetPage -> singlePathOnlyValidEncoder $ fmap T.pack pages
     InR obeliskRoute -> runValidEncoderFunc myObeliskRestValidEncoder obeliskRoute
 
 --TODO: Should we rename `Route` to `AppRoute`?
 data BackendRoute :: * -> * where
   --TODO: How do we do routes with strongly-typed results?
-  BackendRoute_GetPage :: Text -> BackendRoute ()
+  BackendRoute_GetPage :: BackendRoute Text
 
 backendRouteComponentEncoder :: (MonadError Text check, MonadError Text parse) => Encoder check parse (Some BackendRoute) (Maybe Text)
 backendRouteComponentEncoder = enumEncoder $ \case
-  Some.This (BackendRoute_GetPage s) -> Just s
+  Some.This BackendRoute_GetPage-> Just "get-page"
 
 backendRouteRestEncoder :: (Applicative check, MonadError Text parse) => BackendRoute a -> Encoder check parse a PageName
 backendRouteRestEncoder = Encoder . pure . \case
-  BackendRoute_GetPage _ -> endValidEncoder mempty
+  BackendRoute_GetPage -> singlePathOnlyValidEncoder $ fmap T.pack pages
 
 pages :: [FilePath]
 pages = $(embedDirListing sourceDir)
@@ -70,50 +72,72 @@ pageContent :: [(FilePath, ByteString)]
 pageContent = $(embedDir sourceDir)
 
 instance Universe (Some BackendRoute) where
-  universe = Some.This . BackendRoute_GetPage . T.pack <$> pages
+  -- universe = Some.This . BackendRoute_GetPage . T.pack <$> pages
+  universe =
+    [ Some.This BackendRoute_GetPage
+    ]
+
+instance Universe (R BackendRoute) where
+  universe =
+    [
+    ] <> fmap (\f -> BackendRoute_GetPage :/ T.pack f) pages
 
 data Route :: * -> * where
-  Route_Landing :: Route ()
-  Route_Page :: Text -> Route ()
+  Route_Home :: Route ()
+  Route_Page :: Route Text
 
 instance Universe (Some Route) where
   universe =
-    [ Some.This Route_Landing
-    ] <> (Some.This . Route_Page . routeForPage <$> pages)
+    [ Some.This Route_Home
+    , Some.This Route_Page
+    ]
 
 instance Universe (R Route) where
   universe =
-    [ Route_Landing :/ ()
-    ]
+    [ Route_Home :/ ()
+    ] <> fmap (\f -> Route_Page :/ routeForPage f) pages
 
 routeComponentEncoder
   :: (MonadError Text check, MonadError Text parse)
   => Encoder check parse (Some Route) (Maybe Text)
-routeComponentEncoder = enum1Encoder $ \case
-  Route_Landing -> Nothing
-  Route_Page s -> Just s
+routeComponentEncoder = enumEncoder $ \case
+  Some.This Route_Home -> Nothing
+  Some.This Route_Page -> Just "page"
 
 routeRestEncoder
   :: (Applicative check, MonadError Text parse)
   => Route a -> Encoder check parse a PageName
 routeRestEncoder = Encoder . pure . \case
-  Route_Landing -> endValidEncoder mempty
-  Route_Page _ -> endValidEncoder mempty
+  Route_Home -> endValidEncoder mempty
+  Route_Page -> singlePathOnlyValidEncoder $ fmap routeForPage pages
+
+singlePathOnlyValidEncoder :: (MonadError Text parse) => [Text] -> ValidEncoder parse Text PageName
+singlePathOnlyValidEncoder choices = ValidEncoder
+  { _validEncoder_decode = \(path, query) -> if query /= mempty
+    then throwError "singlePathOnlyValidEncoder: query was provided"
+    else case path of
+      [] -> throwError $ "singlePathOnlyValidEncoder: empty"
+      [x] -> if elem x choices
+        then pure x
+        else throwError $ "singlePathOnlyValidEncoder: invalid path: " <> x <> " accepted: " <> T.pack (show choices)
+      xs -> throwError $ "singlePathOnlyValidEncoder: multiple paths: " <> T.pack (show xs)
+  , _validEncoder_encode = \path -> ([path], mempty)
+  }
 
 instance ShowTag Route Identity where
   showTaggedPrec = \case
-    Route_Landing -> showsPrec
-    Route_Page _ -> showsPrec
+    Route_Home -> showsPrec
+    Route_Page -> showsPrec
 
 instance EqTag Route Identity where
   eqTagged = \case
-    Route_Landing -> \_ -> (==)
-    Route_Page _ -> \_ -> (==)
+    Route_Home -> \_ -> (==)
+    Route_Page -> \_ -> (==)
 
 instance OrdTag Route Identity where
   compareTagged = \case
-    Route_Landing -> \_ -> compare
-    Route_Page _ -> \_ -> compare
+    Route_Home -> \_ -> compare
+    Route_Page -> \_ -> compare
 
 deriveGShow ''Route
 deriveGEq ''Route

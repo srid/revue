@@ -4,4 +4,4 @@ This website is work in progress. Meanwhile you may [look at my resume](https://
 
 ## Sub pages
 
-- [Haskell](haskell)
+- [Haskell](page/haskell)
