@@ -31,8 +31,8 @@ backend :: Backend BackendRoute Route
 backend = Backend
   { _backend_routeEncoder = backendRouteEncoder
   , _backend_run = \serve -> serve $ \case
-      BackendRoute_GetPage s :=> Identity () -> do
-        let Just content = getSource $ T.unpack s
+      BackendRoute_GetPage :=> Identity f -> do
+        let Just content = getSource $ T.unpack f
         (_page, html) <- liftIO $ renderStatic $ do
           markdownView $ T.decodeUtf8 content
         writeBS html
