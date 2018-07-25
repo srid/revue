@@ -72,7 +72,6 @@ pageContent :: [(FilePath, ByteString)]
 pageContent = $(embedDir sourceDir)
 
 instance Universe (Some BackendRoute) where
-  -- universe = Some.This . BackendRoute_GetPage . T.pack <$> pages
   universe =
     [ Some.This BackendRoute_GetPage
     ]
@@ -111,6 +110,7 @@ routeRestEncoder = Encoder . pure . \case
   Route_Home -> endValidEncoder mempty
   Route_Page -> singlePathOnlyValidEncoder $ fmap routeForPage pages
 
+-- TODO: upstream or drop
 singlePathOnlyValidEncoder :: (MonadError Text parse) => [Text] -> ValidEncoder parse Text PageName
 singlePathOnlyValidEncoder choices = ValidEncoder
   { _validEncoder_decode = \(path, query) -> if query /= mempty

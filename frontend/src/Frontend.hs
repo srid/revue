@@ -57,8 +57,7 @@ frontend = Frontend
           resp <- prerender (pure never) $ lift $ do
             fetchContent $ backendRoute BackendRoute_GetPage $ name <> ".md"
           -- Workaround the fetchContent bug by using holdUniqDyn
-          content :: Dynamic t Text <- holdUniqDyn
-            =<< holdDyn "Loading..." resp
+          content :: Dynamic t Text <- holdUniqDyn =<< holdDyn "Loading..." resp
 
           divClass "ui container" $ do
             divClass "ui top attached inverted header" $ do
@@ -72,8 +71,8 @@ frontend = Frontend
               divClass "footer" $ do
                 elAttr "a" ("href" =: projectUrl) $ text "Powered by Haskell"
   -- TODO: Why are these titles not being set at all? See also `_frontend_head`
-  , _frontend_title = const "WIP"
-  , _frontend_notFoundRoute = \_ -> Route_Home :/ () -- TODO
+  , _frontend_title = const "TODO this title" -- not used
+  , _frontend_notFoundRoute = \_ -> Route_Home :/ () -- TODO: not used i think
   }
   where
     projectUrl = "https://github.com/srid/revue" :: Text

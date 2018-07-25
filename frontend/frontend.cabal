@@ -16,6 +16,7 @@ library
                , clay
                , modern-uri
                , jsaddle
+               , mtl
   exposed-modules:
     Frontend
     Frontend.Css
@@ -36,6 +37,7 @@ executable frontend
                , clay
                , modern-uri
                , jsaddle
+               , mtl
   --TODO: Make these ghc-options optional
   ghc-options: -threaded
   if os(darwin)
