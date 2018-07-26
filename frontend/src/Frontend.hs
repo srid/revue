@@ -70,8 +70,6 @@ frontend = Frontend
             divClass "ui secondary bottom attached segment" $ do
               divClass "footer" $ do
                 elAttr "a" ("href" =: projectUrl) $ text "Powered by Haskell"
-  -- TODO: Why are these titles not being set at all? See also `_frontend_head`
-  , _frontend_title = const "TODO this title" -- not used
   , _frontend_notFoundRoute = \_ -> Route_Home :/ () -- TODO: not used i think
   }
   where
