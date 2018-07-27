@@ -13,7 +13,6 @@ import Prelude hiding (id, (.))
 
 import Control.Category
 import Control.Monad (void)
-import Control.Monad.Except (lift)
 import Data.Maybe (fromMaybe)
 import Data.Monoid hiding ((<>))
 import Data.Semigroup ((<>))
@@ -54,19 +53,17 @@ frontend = Frontend
           Route_Home -> pure $ pure "landing"
           Route_Page -> askRoute
         void $ dyn $ ffor pageName $ \name -> do
-          resp <- prerender (pure never) $ lift $ do
-            fetchContent $ backendRoute BackendRoute_GetPage $ name <> ".md"
-          -- Workaround the fetchContent bug by using holdUniqDyn
-          content :: Dynamic t Text <- holdUniqDyn =<< holdDyn "Loading..." resp
-
           divClass "ui container" $ do
             divClass "ui top attached inverted header" $ do
               evt <- click' $ el' "h1" $ text title
               tellEvent $ Endo (const $ Route_Home :/ ()) <$ evt
             divClass "ui attached segment" $
               elAttr "div" ("id" =: "content") $ do
-                divClass "markdown" $ do
-                  prerender (text "JavaScript is required to view this page.") $ void $ elDynHtml' "div" content
+                divClass "markdown" $ prerender (text "JavaScript is required to view this page.") $
+                  void $ elDynHtml' "div" =<< do
+                    -- Workaround a fetchContent bug (duplicate events) by using holdUniqDyn
+                    holdUniqDyn =<< holdDyn "Loading..."
+                      =<< fetchContent (backendRoute BackendRoute_GetPage $ name <> ".md")
             divClass "ui secondary bottom attached segment" $ do
               divClass "footer" $ do
                 elAttr "a" ("href" =: projectUrl) $ text "Powered by Haskell"
