@@ -20,13 +20,13 @@ themeColor = lightgreen
 -- themeLighterColor = "#e9fce9"
 
 mainFont :: (Text, Text)
-mainFont = ("Comfortaa:700", "Comfortaa")
+mainFont = ("IBM+Plex+Serif:400,400i", "IBM Plex Serif")
 
 headerFont :: (Text, Text)
-headerFont = ("Chela+One", "Chela One")
+headerFont = ("IBM+Plex+Sans", "IBM Plex Sans")
 
 monoFont :: (Text, Text)
-monoFont = ("Roboto+Mono", "Roboto Mono")
+monoFont = ("IBM+Plex+Mono", "IBM Plex Mono")
 
 appCss :: Css
 appCss = do
@@ -37,7 +37,7 @@ appCss = do
   "#content" ? do
     important $ fontFamily [snd mainFont] [sansSerif]
 
-  "h1, h2, h3, h4, h5, h6" ? do
+  "h1, h2, h3, h4, h5, h6, .footer" ? do
     important $ fontFamily [snd headerFont] [cursive]
 
   "h1" ? do
@@ -58,5 +58,5 @@ appCss = do
       sym margin auto
       sym padding $ em 1
 
-    ".footer" ? do
+    ".footer a" ? do
       textAlign center
