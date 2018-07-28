@@ -8,22 +8,19 @@ revue uses Obelisk. Use `ob run` to run locally, and `nix-build -A exe` (or `ob 
 
 ## Documentation
 
-Markdown pages can be added to `page` directory, for example:
+Add your markdown files (must have a `landing.md` file) to a directory, and run as:
 
 ```
-echo "This is _markdown_ content" > page/hello.md
+export REVUE_CONTENT_DIR=/path/to/your/content 
+ob run
 ```
 
-These pages get embedded automatically during Haskell compilation. Each page automatically gets its own route. For example, the `page/hello.md` content can be accessed from the frontend as `http://localhost:8000/hello` (append `.md` to the URL to view the markdown source).
 
-## Publishing new content
+Each page automatically gets its own route. For example, the `hello.md` content can be accessed from the frontend as `http://localhost:8000/page/hello`
 
-(These instructions are for my own site--srid.ca)
+## Example
 
-```
-# Commit any changes first.
-./publish.sh
-```
+See [srid.ca](https://github.com/srid/srid.ca) for an example site, which includes systemd and nginx configuration.
 
 ## Roadmap
 
