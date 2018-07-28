@@ -16,7 +16,6 @@ import Control.Monad.Except
 import Data.ByteString (ByteString)
 import Data.FileEmbed
 import Data.Functor.Sum
-import Data.List (elem)
 import Data.Some (Some)
 import qualified Data.Some as Some
 import Data.Text (Text)
@@ -38,17 +37,17 @@ backendRouteEncoder = Encoder $ do
   myObeliskRestValidEncoder <- checkObeliskRouteRestEncoder routeRestEncoder
   checkEncoder $ pathComponentEncoder myComponentEncoder $ \case
     InL backendRoute -> case backendRoute of
-      BackendRoute_GetPage -> singlePathOnlyValidEncoder $ fmap T.pack pages
+      BackendRoute_GetPage -> pathOnlyValidEncoder -- singlePathOnlyValidEncoder $ fmap T.pack pages
     InR obeliskRoute -> runValidEncoderFunc myObeliskRestValidEncoder obeliskRoute
 
 --TODO: Should we rename `Route` to `AppRoute`?
 data BackendRoute :: * -> * where
   --TODO: How do we do routes with strongly-typed results?
-  BackendRoute_GetPage :: BackendRoute Text
+  BackendRoute_GetPage :: BackendRoute [Text]
 
 data Route :: * -> * where
   Route_Home :: Route ()
-  Route_Page :: Route Text
+  Route_Page :: Route [Text]
 
 backendRouteComponentEncoder :: (MonadError Text check, MonadError Text parse) => Encoder check parse (Some BackendRoute) (Maybe Text)
 backendRouteComponentEncoder = enumEncoder $ \case
@@ -56,7 +55,7 @@ backendRouteComponentEncoder = enumEncoder $ \case
 
 backendRouteRestEncoder :: (Applicative check, MonadError Text parse) => BackendRoute a -> Encoder check parse a PageName
 backendRouteRestEncoder = Encoder . pure . \case
-  BackendRoute_GetPage -> singlePathOnlyValidEncoder $ fmap T.pack pages
+  BackendRoute_GetPage -> pathOnlyValidEncoder -- singlePathOnlyValidEncoder $ fmap T.pack pages
 
 pages :: [FilePath]
 pages = $(embedDirListing sourceDir)
@@ -83,21 +82,7 @@ routeRestEncoder
   => Route a -> Encoder check parse a PageName
 routeRestEncoder = Encoder . pure . \case
   Route_Home -> endValidEncoder mempty
-  Route_Page -> singlePathOnlyValidEncoder $ fmap routeForPage pages
-
--- TODO: upstream or drop
-singlePathOnlyValidEncoder :: (MonadError Text parse) => [Text] -> ValidEncoder parse Text PageName
-singlePathOnlyValidEncoder choices = ValidEncoder
-  { _validEncoder_decode = \(path, query) -> if query /= mempty
-    then throwError "singlePathOnlyValidEncoder: query was provided"
-    else case path of
-      [] -> throwError $ "singlePathOnlyValidEncoder: empty"
-      [x] -> if elem x choices
-        then pure x
-        else throwError $ "singlePathOnlyValidEncoder: invalid path: " <> x <> " accepted: " <> T.pack (show choices)
-      xs -> throwError $ "singlePathOnlyValidEncoder: multiple paths: " <> T.pack (show xs)
-  , _validEncoder_encode = \path -> ([path], mempty)
-  }
+  Route_Page -> pathOnlyValidEncoder -- singlePathOnlyValidEncoder $ fmap routeForPage pages
 
 concat <$> mapM deriveRouteComponent
   [ ''Route

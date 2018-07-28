@@ -39,7 +39,7 @@ frontend = Frontend
   { _frontend_head = subRoute_ $ \r -> do
       pageName :: Dynamic t Text <- case r of
         Route_Home -> pure $ pure title
-        Route_Page -> fmap (<> " - " <> title) <$> askRoute
+        Route_Page -> fmap ((<> " - " <> title) . mconcat) <$> askRoute
       elAttr "base" ("href" =: "/") blank
       elAttr "meta" ("name" =: "viewport" <> "content" =: "width=device-width, initial-scale=1") blank
       elAttr "link" ("rel" =: "stylesheet" <> "type" =: "text/css" <> "href" =: static @"semantic.min.css") blank
@@ -49,8 +49,8 @@ frontend = Frontend
       el "title" $ dynText pageName
   , _frontend_body = do
       subRoute_ $ \r -> do
-        pageName :: Dynamic t Text <- case r of
-          Route_Home -> pure $ pure "landing"
+        pageName :: Dynamic t [Text] <- case r of
+          Route_Home -> pure $ pure ["landing"]
           Route_Page -> askRoute
         void $ dyn $ ffor pageName $ \name -> do
           divClass "ui container" $ do
@@ -63,7 +63,7 @@ frontend = Frontend
                   void $ elDynHtml' "div" =<< do
                     -- Workaround a fetchContent bug (duplicate events) by using holdUniqDyn
                     holdUniqDyn =<< holdDyn "Loading..."
-                      =<< fetchContent (backendRoute BackendRoute_GetPage $ name <> ".md")
+                      =<< fetchContent (backendRoute BackendRoute_GetPage name)
             divClass "ui secondary bottom attached segment" $ do
               divClass "footer" $ do
                 elAttr "a" ("href" =: projectUrl) $ text "Powered by Haskell"
@@ -96,4 +96,7 @@ fetchContent url = do
   pb <- getPostBuild
   -- FIXME: Why is asyncReq firing 3 times?
   responses <- performRequestAsync $ req <$ pb
-  pure $ fmap (fromMaybe "    fetchContent: Unknown error" . _xhrResponse_responseText) responses
+  pure $ ffor responses $ \resp -> do
+    if _xhrResponse_status resp >= 200 && _xhrResponse_status resp < 300
+      then fromMaybe "    fetchContent: Unknown error" $ _xhrResponse_responseText resp
+      else "    fetchContent: 404"

@@ -32,8 +32,13 @@ backend = Backend
   { _backend_routeEncoder = backendRouteEncoder
   , _backend_run = \serve -> serve $ \case
       BackendRoute_GetPage :=> Identity f -> do
-        let Just content = getSource $ T.unpack f
-        (_page, html) <- liftIO $ renderStatic $ do
-          markdownView $ T.decodeUtf8 content
-        writeBS html
+        -- TODO: Don't use head; and then securely traverse the path.
+        let fname = T.unpack (head f) <> ".md"
+        case getSource fname of
+          Nothing ->
+            putResponse $ setResponseCode 404 emptyResponse
+          Just content -> do
+            (_page, html) <- liftIO $ renderStatic $ do
+              markdownView $ T.decodeUtf8 content
+            writeBS html
   }
