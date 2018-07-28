@@ -17,4 +17,3 @@ data Page = Page
 
 instance FromJSON Page
 instance ToJSON Page
-

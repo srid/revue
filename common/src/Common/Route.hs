@@ -19,7 +19,6 @@ import Data.Functor.Sum
 import Data.Some (Some)
 import qualified Data.Some as Some
 import Data.Text (Text)
-import qualified Data.Text as T
 import System.FilePath (FilePath)
 
 import Obelisk.Route
@@ -37,7 +36,7 @@ backendRouteEncoder = Encoder $ do
   myObeliskRestValidEncoder <- checkObeliskRouteRestEncoder routeRestEncoder
   checkEncoder $ pathComponentEncoder myComponentEncoder $ \case
     InL backendRoute -> case backendRoute of
-      BackendRoute_GetPage -> pathOnlyValidEncoder -- singlePathOnlyValidEncoder $ fmap T.pack pages
+      BackendRoute_GetPage -> pathOnlyValidEncoder
     InR obeliskRoute -> runValidEncoderFunc myObeliskRestValidEncoder obeliskRoute
 
 --TODO: Should we rename `Route` to `AppRoute`?
@@ -55,20 +54,7 @@ backendRouteComponentEncoder = enumEncoder $ \case
 
 backendRouteRestEncoder :: (Applicative check, MonadError Text parse) => BackendRoute a -> Encoder check parse a PageName
 backendRouteRestEncoder = Encoder . pure . \case
-  BackendRoute_GetPage -> pathOnlyValidEncoder -- singlePathOnlyValidEncoder $ fmap T.pack pages
-
-pages :: [FilePath]
-pages = $(embedDirListing sourceDir)
-
--- | Gets the user facing route path for a page.
-routeForPage :: FilePath -> Text
-routeForPage = fst . T.breakOn ".md" . T.pack
-
--- FIXME: This should live in the backend, however unfortunately full ghc
--- build if the content exists only in one of common and backend packages.
--- To workaround, we move all TH stuff to the package where the content lives.
-pageContent :: [(FilePath, ByteString)]
-pageContent = $(embedDir sourceDir)
+  BackendRoute_GetPage -> pathOnlyValidEncoder
 
 routeComponentEncoder
   :: (MonadError Text check, MonadError Text parse)
@@ -82,7 +68,7 @@ routeRestEncoder
   => Route a -> Encoder check parse a PageName
 routeRestEncoder = Encoder . pure . \case
   Route_Home -> endValidEncoder mempty
-  Route_Page -> pathOnlyValidEncoder -- singlePathOnlyValidEncoder $ fmap routeForPage pages
+  Route_Page -> pathOnlyValidEncoder
 
 concat <$> mapM deriveRouteComponent
   [ ''Route
