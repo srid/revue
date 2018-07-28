@@ -17,7 +17,6 @@ library
                , universe
                , reflex
                , filepath
-               , file-embed
                , template-haskell
                , universe-template
   exposed-modules:

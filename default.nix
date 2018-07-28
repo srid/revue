@@ -4,12 +4,11 @@
 with import ./.obelisk/impl { inherit system iosSdkVersion; };
 project ./. ({ pkgs, hackGet, ... }: {
   android.applicationId = "ca.srid.revue.dev";
-  android.displayName = "Revue (srid)";
+  android.displayName = "Revue";
   ios.bundleIdentifier = "ca.srid.revue.dev";
-  ios.bundleName = "Revue (srid)";
+  ios.bundleName = "Revue";
 
   packages = {
-    file-embed = hackGet ./dep/file-embed;
     clay = pkgs.fetchFromGitHub {
       owner = "sebastiaanvisser";
       repo = "clay";
