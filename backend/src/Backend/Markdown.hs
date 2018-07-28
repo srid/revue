@@ -40,6 +40,7 @@ parsePage r = case MMark.projectYaml r of
 markdownView :: DomBuilder t m => Text -> m (Maybe Page)
 markdownView source = case MMark.parse "<nofile>" source of
   Left errs -> elClass "tt" "markdown-error" $ do
+    el "h2" $ text "Error parsing markdown:"
     text $ T.pack (MMark.parseErrorsPretty source errs)
     pure Nothing
   Right r -> do

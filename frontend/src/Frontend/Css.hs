@@ -60,3 +60,7 @@ appCss = do
 
     ".footer a" ? do
       textAlign center
+
+  ".markdown-error" ? do
+    whiteSpace preLine
+    color red
