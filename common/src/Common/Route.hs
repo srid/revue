@@ -13,18 +13,13 @@ import Prelude hiding ((.))
 
 import Control.Category
 import Control.Monad.Except
-import Data.ByteString (ByteString)
-import Data.FileEmbed
 import Data.Functor.Sum
 import Data.Some (Some)
 import qualified Data.Some as Some
 import Data.Text (Text)
-import System.FilePath (FilePath)
 
 import Obelisk.Route
 import Obelisk.Route.TH
-
-import Common.Api
 
 backendRouteEncoder
   :: ( check ~ parse
