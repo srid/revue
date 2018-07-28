@@ -23,6 +23,8 @@ library
                , modern-uri
                , yaml
                , aeson
+               , directory
+               , filepath
   exposed-modules:
     Backend
     Backend.Markdown
@@ -38,6 +40,8 @@ executable backend
                , common
                , text
                , foldl
+               , directory
+               , filepath
                , file-embed
                , snap
                , bytestring
