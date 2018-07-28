@@ -11,24 +11,20 @@ module Common.Route where
 
 import Prelude hiding ((.))
 
-import Obelisk.Route
-
 import Control.Category
 import Control.Monad.Except
 import Data.ByteString (ByteString)
-import Data.Dependent.Sum
 import Data.FileEmbed
-import Data.Functor.Identity
 import Data.Functor.Sum
-import Data.GADT.Compare.TH
-import Data.GADT.Show.TH
 import Data.List (elem)
 import Data.Some (Some)
 import qualified Data.Some as Some
 import Data.Text (Text)
 import qualified Data.Text as T
-import Data.Universe
 import System.FilePath (FilePath)
+
+import Obelisk.Route
+import Obelisk.Route.TH
 
 import Common.Api
 
@@ -50,6 +46,10 @@ data BackendRoute :: * -> * where
   --TODO: How do we do routes with strongly-typed results?
   BackendRoute_GetPage :: BackendRoute Text
 
+data Route :: * -> * where
+  Route_Home :: Route ()
+  Route_Page :: Route Text
+
 backendRouteComponentEncoder :: (MonadError Text check, MonadError Text parse) => Encoder check parse (Some BackendRoute) (Maybe Text)
 backendRouteComponentEncoder = enumEncoder $ \case
   Some.This BackendRoute_GetPage-> Just "get-page"
@@ -70,31 +70,6 @@ routeForPage = fst . T.breakOn ".md" . T.pack
 -- To workaround, we move all TH stuff to the package where the content lives.
 pageContent :: [(FilePath, ByteString)]
 pageContent = $(embedDir sourceDir)
-
-instance Universe (Some BackendRoute) where
-  universe =
-    [ Some.This BackendRoute_GetPage
-    ]
-
-instance Universe (R BackendRoute) where
-  universe =
-    [
-    ] <> fmap (\f -> BackendRoute_GetPage :/ T.pack f) pages
-
-data Route :: * -> * where
-  Route_Home :: Route ()
-  Route_Page :: Route Text
-
-instance Universe (Some Route) where
-  universe =
-    [ Some.This Route_Home
-    , Some.This Route_Page
-    ]
-
-instance Universe (R Route) where
-  universe =
-    [ Route_Home :/ ()
-    ] <> fmap (\f -> Route_Page :/ routeForPage f) pages
 
 routeComponentEncoder
   :: (MonadError Text check, MonadError Text parse)
@@ -124,24 +99,7 @@ singlePathOnlyValidEncoder choices = ValidEncoder
   , _validEncoder_encode = \path -> ([path], mempty)
   }
 
-instance ShowTag Route Identity where
-  showTaggedPrec = \case
-    Route_Home -> showsPrec
-    Route_Page -> showsPrec
-
-instance EqTag Route Identity where
-  eqTagged = \case
-    Route_Home -> \_ -> (==)
-    Route_Page -> \_ -> (==)
-
-instance OrdTag Route Identity where
-  compareTagged = \case
-    Route_Home -> \_ -> compare
-    Route_Page -> \_ -> compare
-
-deriveGShow ''Route
-deriveGEq ''Route
-deriveGCompare ''Route
-deriveGShow ''BackendRoute
-deriveGEq ''BackendRoute
-deriveGCompare ''BackendRoute
+concat <$> mapM deriveRouteComponent
+  [ ''Route
+  , ''BackendRoute
+  ]

@@ -19,7 +19,7 @@ library
                , filepath
                , file-embed
                , template-haskell
-
+               , universe-template
   exposed-modules:
     Common.Api
     Common.Route
