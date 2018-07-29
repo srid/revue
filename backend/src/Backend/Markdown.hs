@@ -11,7 +11,7 @@
 module Backend.Markdown where
 
 import Control.Foldl hiding (mconcat)
-import Control.Monad (forM, forM_)
+import Control.Monad (forM_)
 import Data.Aeson
 import qualified Data.List.NonEmpty as NE
 import Data.Maybe (catMaybes, fromMaybe)
@@ -47,6 +47,7 @@ markdownView source = case MMark.parse "<nofile>" source of
     MMark.runScannerM r $ FoldM (const renderBlock) blank pure
     parsePage r
   where
+    renderBlocks = flip forM_ renderBlock
     renderBlock = \case
       ThematicBreak -> el "tt" $ text "TODO: ThematicBreak"
       Heading1 xs -> el "h1" $ renderInlines xs
@@ -60,11 +61,14 @@ markdownView source = case MMark.parse "<nofile>" source of
         -- text $ "TODO: Naked"
         renderInlines xs
       Paragraph xs -> el "p" $ renderInlines xs
-      Blockquote bs -> el "blockquote" $ flip forM_ renderBlock bs
-      OrderedList _start _bs -> el "ol" $ el "tt" $ text "TODO: OrderedList"
-      UnorderedList bs -> el "ol" $ do
+      Blockquote bs -> el "blockquote" $ renderBlocks bs
+      OrderedList _start bs -> el "ol" $ do
+        -- TODO: What to do with 'start'?
         forM_ bs $ \b -> do
-          el "li" $ forM b renderBlock
+          el "li" $ renderBlocks b
+      UnorderedList bs -> el "ul" $ do
+        forM_ bs $ \b -> do
+          el "li" $ renderBlocks b
       Table _ _ -> el "tt" $ text "TODO: Table"
     renderInlines = flip forM_ renderInline . NE.toList
     renderInline = \case
