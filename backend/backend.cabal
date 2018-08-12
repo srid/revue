@@ -31,29 +31,10 @@ library
 
 executable backend
   main-is: main.hs
-  hs-source-dirs: src
+  hs-source-dirs: src-bin
   if impl(ghcjs)
     buildable: False
   build-depends: base
                , backend
-               , common
-               , text
-               , foldl
-               , directory
-               , filepath
-               , snap
-               , bytestring
-               , reflex-dom-core
                , frontend
-               , dependent-sum
-               , dependent-sum-template
-               , lens
-               , modern-uri
                , obelisk-backend
-               , obelisk-executable-config
-               , obelisk-executable-config-inject
-               , text
-               , mmark
-               , modern-uri
-               , yaml
-               , aeson

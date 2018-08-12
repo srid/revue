@@ -24,20 +24,13 @@ library
 
 executable frontend
   main-is: main.hs
-  hs-source-dirs: src
+  hs-source-dirs: src-bin
   build-depends: base
-               , common
-               , reflex-dom
-               , static
-               , text
-               , frontend
-               , string-conv
-               , obelisk-route
                , obelisk-frontend
-               , clay
-               , modern-uri
-               , jsaddle
-               , mtl
+               , obelisk-route
+               , reflex-dom
+               , common
+               , frontend
   --TODO: Make these ghc-options optional
   ghc-options: -threaded
   if os(darwin)
