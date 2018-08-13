@@ -40,13 +40,15 @@ appCss = do
   "h1, h2, h3, h4, h5, h6, .footer" ? do
     important $ fontFamily [snd headerFont] [cursive]
 
+  "li" ? do
+    marginBottom $ em 0.4
+
   "div.header h1" ? do
     cursor pointer
 
   "div.markdown h1" ? do
     backgroundColor "#ccc"
-    sym padding $ rem 1
-    border solid (px 1) black
+    sym padding $ rem 0.4
 
   "code, pre, tt" ? do
     important $ fontFamily [snd monoFont] [monospace]
