@@ -22,6 +22,12 @@ project ./. ({ pkgs, hackGet, ... }: {
       rev = "61c29e3b363e582cc317971760a6e4737264589a";
       sha256 = "17j8ylwimw5l2314l80il7044j8zmd0z7vaqyh4vk2rf4ya0xwvr";
     };
+   mmark-ext = pkgs.fetchFromGitHub {
+      owner = "mmark-md";
+      repo = "mmark-ext";
+      rev = "c86f20e8fdab8aa61e93fad08a842eed53349151";
+      sha256 = "173vffh4lbpqxf1lzzix0d8wq9pp45i91xwd247ip1fk8zi13dc9";
+    };
     html-entity-map = pkgs.fetchFromGitHub {
       owner = "mrkkrp";
       repo = "html-entity-map";
@@ -51,6 +57,7 @@ project ./. ({ pkgs, hackGet, ... }: {
   overrides = self: super: with pkgs.haskell.lib; {
     clay = dontCheck super.clay;
     mmark = dontCheck super.mmark;
+    mmark-exe = dontCheck super.mmark-ext;
     megaparsec = dontCheck super.megaparsec;
     text-metrics = dontCheck super.text-metrics;
     mockery = dontCheck super.mockery;

@@ -19,6 +19,7 @@ library
                , dependent-sum
                , dependent-sum-template
                , mmark
+               , mmark-ext
                , modern-uri
                , yaml
                , aeson

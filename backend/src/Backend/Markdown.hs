@@ -23,6 +23,7 @@ import Reflex.Dom.Core hiding (Link, Value)
 
 import qualified Text.MMark as MMark
 import Text.MMark.Extension (Block (..), Inline (..))
+import qualified Text.MMark.Extension.Common as Ext
 import qualified Text.URI as URI
 
 import Common.Api
@@ -44,9 +45,16 @@ markdownView source = case MMark.parse "<nofile>" source of
     text $ T.pack (MMark.parseErrorsPretty source errs)
     pure Nothing
   Right r -> do
-    MMark.runScannerM r $ FoldM (const renderBlock) blank pure
-    parsePage r
+    let r' = MMark.useExtensions extensions r
+    MMark.runScannerM r' $ FoldM (const renderBlock) blank pure
+    parsePage r'
   where
+    -- FIXME: None of these extensions, except kbd, work.
+    extensions =
+      [ Ext.punctuationPrettifier
+      , Ext.skylighting
+      , Ext.kbd
+      ]
     renderBlocks = flip forM_ renderBlock
     renderBlock = \case
       ThematicBreak -> el "tt" $ text "TODO: ThematicBreak"
